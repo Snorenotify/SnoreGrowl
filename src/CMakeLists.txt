@@ -4,7 +4,7 @@ set( GROWL_NTP_C_SRC    growl.c
                         tcp.c
                         md5.c )
 
-add_library( snoregrowl SHARED  ${GROWL_NTP_C_SRC} )
+add_library( snoregrowl ${SNOREGROWL_LINK_MODE} ${GROWL_NTP_C_SRC} )
 target_link_libraries( snoregrowl PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties( snoregrowl   PROPERTIES
                                     VERSION "${SNOREGROWL_VERSION_MAJOR}.${SNOREGROWL_VERSION_MINOR}.${SNOREGROWL_VERSION_PATCH}"
@@ -27,8 +27,8 @@ target_include_directories(snoregrowl PUBLIC
 
 
 
-add_library( snoregrowl++ SHARED growl.cpp )
-target_link_libraries( snoregrowl++  snoregrowl)
+add_library( snoregrowl++ ${SNOREGROWL_LINK_MODE} growl.cpp )
+target_link_libraries( snoregrowl++  snoregrowl ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties( snoregrowl++ PROPERTIES
                                     VERSION "${SNOREGROWL_VERSION_MAJOR}.${SNOREGROWL_VERSION_MINOR}.${SNOREGROWL_VERSION_PATCH}"
                                     SOVERSION "${SNOREGROWL_VERSION_MAJOR}.${SNOREGROWL_VERSION_MINOR}"
@@ -40,12 +40,12 @@ add_executable( gntp-send gntp-send.c )
 target_link_libraries ( gntp-send snoregrowl)
 
 add_executable( gntp-send++ gntp-send.cpp )
-target_link_libraries ( gntp-send++ snoregrowl++)
+target_link_libraries ( gntp-send++ snoregrowl snoregrowl++)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SnoreGrowlConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/SnoreGrowlConfig.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SnoreGrowl++Config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/SnoreGrowl++Config.cmake" @ONLY)
 
-install(TARGETS snoregrowl  EXPORT SnoreGrowlTarget
+install(TARGETS snoregrowl EXPORT SnoreGrowlTarget
                             RUNTIME DESTINATION bin
                             LIBRARY DESTINATION lib
                             ARCHIVE DESTINATION lib)
