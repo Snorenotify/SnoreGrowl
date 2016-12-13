@@ -1,24 +1,23 @@
 version: '{build}'
-   
+
 build_script:
-    - ps: >-
-        if ( !(Test-Path "$env:APPVEYOR_BUILD_FOLDER\appveyorHelp.psm1"))
-        {
-            Start-FileDownload https://raw.githubusercontent.com/TheOneRing/appVeyorHelp/master/appveyorHelp.psm1 -FileName $env:APPVEYOR_BUILD_FOLDER\appveyorHelp.psm1 
+    - ps: |
+        if ( !(Test-Path "$env:APPVEYOR_BUILD_FOLDER\appveyorHelp.psm1")) {
+            Start-FileDownload https://raw.githubusercontent.com/TheOneRing/appVeyorHelp/master/appveyorHelp.psm1 -FileName $env:APPVEYOR_BUILD_FOLDER\appveyorHelp.psm1
         }
-        
+
         $ErrorActionPreference="Stop"
-        
+
         Import-Module $env:APPVEYOR_BUILD_FOLDER\appveyorHelp.psm1
-        
+
         Init @("ninja")
-        
+
         mkdir -Force $env:APPVEYOR_BUILD_FOLDER\work\build\$env:APPVEYOR_PROJECT_NAME
-        
+
         cd $env:APPVEYOR_BUILD_FOLDER\work\build\$env:APPVEYOR_PROJECT_NAME
-        
-        LogExec cmake -G"Ninja" $env:APPVEYOR_BUILD_FOLDER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$CMAKE_INSTALL_ROOT"
-        
+
+        LogExec cmake -G"Ninja" $env:APPVEYOR_BUILD_FOLDER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$CMAKE_INSTALL_ROOT" -DSNOREGROWL_STATIC="$env:SNOREGROWL_STATIC"
+
         CmakeImageInstall "$env:APPVEYOR_BUILD_FOLDER\work\image"
 
 test: off
@@ -26,21 +25,29 @@ test: off
 cache:
     - C:\ProgramData\chocolatey\bin -> appveyor.yml
     - C:\ProgramData\chocolatey\lib -> appveyor.yml
-    - C:\tools -> appveyor.yml
     - appveyorHelp.psm1 -> appveyor.yml
 
+
 environment:
-    QT_VER: 5.5
+    QT_VER: 5.7
+
     matrix:
-    - COMPILER: msvc2013
-    - COMPILER: msvc2013_64
-    - COMPILER: mingw492_32
-    
+    #msvc
+    - COMPILER: msvc2015_64
+      SNOREGROWL_STATIC: ON
+    - COMPILER: msvc2015_64
+      SNOREGROWL_STATIC: OFF
+    - COMPILER: msvc2015
+      SNOREGROWL_STATIC: ON
+    - COMPILER: msvc2015
+      SNOREGROWL_STATIC: OFF
+
+    #mingw
+    - COMPILER: mingw53_32
+      SNOREGROWL_STATIC: ON
+    - COMPILER: mingw53_32
+      SNOREGROWL_STATIC: OFF
+
 artifacts:
     - path: work\image
       name: $(APPVEYOR_PROJECT_NAME)-Qt$(QT_VER)-$(COMPILER)
-      
-deploy:
-    - provider: Environment
-      name: my
-      
